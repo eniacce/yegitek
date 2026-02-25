@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}İtem Listesi{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="bi bi-list-ul me-2"></i>İtem Yönetimi</h4>
+        <a href="{{ path('item_new') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Yeni İtem Ekle
+        </a>
+    </div>
+
+    <!-- Arama -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{{ path('item_index') }}" class="d-flex gap-2">
+                <input type="text" name="search" value="{{ search ?? '' }}"
+                       class="form-control" placeholder="İsme göre ara...">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i>
+                </button>
+                {% if search is defined and search %}
+                    <a href="{{ path('item_index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- İtem Tablosu -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-table me-2"></i>İtem Listesi</span>
+            <span class="badge bg-light text-dark">{{ items|length }} kayıt</span>
+        </div>
+        <div class="card-body p-0">
+            {% if items is empty %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mt-2">Henüz item yok. <a href="{{ path('item_new') }}">İlk itemi ekle</a></p>
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>İsim</th>
+                            <th class="text-center">İşlemler</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in items %}
+                            <tr>
+                                <td class="text-muted">{{ item.id }}</td>
+                                <td><strong>{{ item.name }}</strong></td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ path('item_edit', {id: item.id}) }}"
+                                           class="btn btn-outline-warning" title="Düzenle">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger"
+                                                title="Sil"
+                                                onclick="confirmDelete({{ item.id }}, '{{ item.name }}', '{{ csrf_token('delete' ~ item.id) }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Silme Onayı</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong id="deleteItemName"></strong> itemini silmek istediğinize emin misiniz?</p>
+                    <p class="text-muted small">Bu işlem geri alınamaz.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <form id="deleteForm" method="post">
+                        <input type="hidden" name="_token" id="deleteToken">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>Evet, Sil
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function confirmDelete(id, name, token) {
+            document.getElementById('deleteItemName').textContent = name;
+            document.getElementById('deleteForm').action = '/items/' + id + '/delete';
+            document.getElementById('deleteToken').value = token;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+{% endblock %}
