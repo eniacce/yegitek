@@ -63,7 +63,7 @@
                                         </a>
                                         <button type="button" class="btn btn-outline-danger"
                                                 title="Sil"
-                                                onclick="confirmDelete({{ item.id }}, '{{ item.name }}', '{{ csrf_token('delete' ~ item.id) }}')">
+                                                onclick="confirmDelete({{ item.id }}, '{{ item.name }}')">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
@@ -92,7 +92,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <form id="deleteForm" method="post">
-                        <input type="hidden" name="_token" id="deleteToken">
                         <button type="submit" class="btn btn-danger">
                             <i class="bi bi-trash me-1"></i>Evet, Sil
                         </button>
@@ -105,10 +104,9 @@
 
 {% block scripts %}
     <script>
-        function confirmDelete(id, name, token) {
+        function confirmDelete(id, name) {
             document.getElementById('deleteItemName').textContent = name;
             document.getElementById('deleteForm').action = '/items/' + id + '/delete';
-            document.getElementById('deleteToken').value = token;
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
     </script>

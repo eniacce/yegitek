@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nginx-test
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: nginx-test
+    template:
+        metadata:
+            labels:
+                app: nginx-test
+        spec:
+            initContainers:
+                - name: init-index
+                  image: busybox
+                  command:
+                      - sh
+                      - -c
+                      - |
+                          echo "<html>
+                          <head><title>Nginx Pod Info</title></head>
+                          <body style='font-family:sans-serif; text-align:center; margin-top:100px'>
+                          <h1>Pod IP: $MY_POD_IP</h1>
+                          <h2>Pod Name: $MY_POD_NAME</h2>
+                          <h3>Node: $MY_NODE_NAME</h3>
+                          </body></html>" > /usr/share/nginx/html/index.html
+                  env:
+                      - name: MY_POD_IP
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: status.podIP
+                      - name: MY_POD_NAME
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: metadata.name
+                      - name: MY_NODE_NAME
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: spec.nodeName
+                  volumeMounts:
+                      - name: html
+                        mountPath: /usr/share/nginx/html
+
+            containers:
+                - name: nginx
+                  image: quay.io/mesut_aygun/xxx:latest
+                  resources:
+                      limits:
+                          memory: "128Mi"
+                          cpu: "500m"
+                  ports:
+                      - containerPort: 9100
+                  volumeMounts:
+                      - name: html
+                        mountPath: /usr/share/nginx/html
+
+            volumes:
+                - name: html
+                  emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: nginx-test
+spec:
+    selector:
+        app: nginx-test
+    ports:
+        - port: 9100
+          targetPort: 9100
+
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+    name: nginx-test
+spec:
+    to:
+        kind: Service
+        name: nginx-test
+    port:
+        targetPort: 9100

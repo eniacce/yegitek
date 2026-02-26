@@ -19,6 +19,19 @@ class ItemController extends AbstractController
         private readonly ItemRepository $itemRepository,
     ) {}
 
+
+
+//    #[Route('/pod-info', name: 'pod_info', methods: ['GET'])]
+//    public function podInfo(): Response
+//    {
+//        return $this->json([
+//            'pod_ip' => $_SERVER['SERVER_ADDR'] ?? gethostbyname(gethostname()),
+//            'hostname' => gethostname(),
+//            'server_port' => $_SERVER['SERVER_PORT'] ?? '8080',
+//        ]);
+//    }
+
+
     // LIST
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response
